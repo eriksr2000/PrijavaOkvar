@@ -22,27 +22,28 @@
 
   button{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
   button:active{background:#b52b27;transform:scale(0.98)}
-  button:disabled{background:#ccc;cursor:not-allowed}
   
   .hint{font-size:12px;color:#666;margin-top:5px;display:block}
-  .error-msg{color:red;font-weight:bold;margin-top:10px;display:none;text-align:center;border: 1px solid red; padding: 10px; border-radius: 5px; background: #fff0f0;}
-  .success-msg{color:green;font-weight:bold;margin-top:10px;display:none;text-align:center;border: 1px solid green; padding: 10px; border-radius: 5px; background: #f0fff0;}
 </style>
 </head>
 <body>
 
 <h1>🚧 Prijava okvare stroja</h1>
 
-<form id="reportForm">
+<form id="reportForm" action="https://formsubmit.co/svajgerramicerik@gmail.com" method="POST" enctype="multipart/form-data">
+
+  <input type="hidden" name="_captcha" value="false">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_subject" id="emailSubject" value="Nova prijava okvare">
 
   <div class="section">
     <label>Stroj</label>
-    <select id="stroj" required>
+    <select id="stroj" name="Stroj" required>
       <option value="" disabled selected>Izberi stroj...</option>
     </select>
 
     <label>Strojnik</label>
-    <select id="strojnik" required>
+    <select id="strojnik" name="Strojnik" required>
       <option value="" disabled selected>Izberi strojnika...</option>
     </select>
   </div>
@@ -57,29 +58,22 @@
     </div>
 
     <label>Opis okvare</label>
-    <textarea id="opis" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
+    <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
-    <label>📷 Fotografije</label>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" multiple>
-    <span class="hint">Izbereš lahko več slik. (Max 20MB)</span>
-    <div id="sizeError" class="error-msg"></div>
+    <label>📷 Fotografija (samo ena)</label>
+    <input type="file" name="attachment" accept="image/*" capture="environment">
+    <span class="hint">Priložiš lahko 1 fotografijo.</span>
   </div>
 
   <button type="submit" id="submitBtn">Pošlji prijavo</button>
-  <div id="successMsg" class="success-msg">✅ Prijava uspešno poslana! Hvala.</div>
-  <div id="failMsg" class="error-msg">❌ Napaka pri pošiljanju. Poskusi ponovno.</div>
   
 </form>
 
 <script>
-// *** NASTAVITVE ***
-const email = "svajgerramicerik@gmail.com"; // <--- TUKAJ VPIŠI SVOJ EMAIL
-// ******************
-
+// 1. Polnjenje seznamov
 const strojSel = document.getElementById("stroj");
 const strojnikSel = document.getElementById("strojnik");
 
-// 1. Polnjenje seznamov
 if (typeof stroji !== 'undefined') {
   stroji.forEach(s => {
     const o = document.createElement("option");
@@ -99,87 +93,24 @@ if (typeof strojniki !== 'undefined') {
   });
 }
 
-// 2. Logika pošiljanja
+// 2. Samo posodobimo Zadevo (Subject) tik pred pošiljanjem
 const form = document.getElementById("reportForm");
 const submitBtn = document.getElementById("submitBtn");
-const fileInput = document.getElementById("fileInput");
-const sizeError = document.getElementById("sizeError");
-const successMsg = document.getElementById("successMsg");
-const failMsg = document.getElementById("failMsg");
-const opisInput = document.getElementById("opis");
 
 form.addEventListener("submit", function(e) {
-  e.preventDefault(); // Prepreči navadno pošiljanje
+  // Ne ustavimo pošiljanja (brez e.preventDefault), pustimo da gre naprej
   
-  // Skrij stara sporočila
-  successMsg.style.display = "none";
-  failMsg.style.display = "none";
-  sizeError.style.display = "none";
-
-  // Preveri velikost slik
-  const files = fileInput.files;
-  let totalSize = 0;
-  for (let i = 0; i < files.length; i++) totalSize += files[i].size;
-
-  if (totalSize > 23 * 1048576) {
-    sizeError.style.display = "block";
-    sizeError.textContent = `⚠️ Slike so prevelike (${(totalSize/1048576).toFixed(1)} MB). Limit je 23 MB.`;
-    return;
-  }
-
-  // Pripravi podatke za pošiljanje (FormData)
-  const formData = new FormData();
-  
-  // Zadeva (Subject)
   const strojVal = strojSel.value.split(' ')[0] || "Neznano";
   const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
   const strojnikVal = strojnikOption.dataset.id || "Neznano";
   const vrstaEl = document.querySelector('input[name="Vrsta_okvare"]:checked');
   const vrstaVal = vrstaEl ? vrstaEl.value : "Drugo";
-  
-  // Dodaj konfiguracijo za FormSubmit
-  formData.append("_captcha", "false");
-  formData.append("_template", "table");
-  formData.append("_subject", `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`);
-  
-  // Dodaj besedilna polja
-  formData.append("Stroj", strojSel.value);
-  formData.append("Strojnik", strojnikSel.value);
-  formData.append("Vrsta_okvare", vrstaVal);
-  formData.append("Opis_okvare", opisInput.value);
 
-  // *** KLJUČNI DEL: Dodajanje slik ***
-  // Ročno dodamo vsako sliko posebej z istim imenom 'attachment'.
-  // Ker uporabljamo AJAX FormData, bo to delovalo brez [], in brez prepisovanja.
-  for (let i = 0; i < files.length; i++) {
-    formData.append("attachment", files[i]);
-  }
+  // Nastavi naslov emaila
+  document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
 
-  // Spremeni gumb
-  submitBtn.innerText = "Pošiljanje... ⏳";
-  submitBtn.disabled = true;
-
-  // Pošlji na FormSubmit AJAX endpoint
-  fetch(`https://formsubmit.co/ajax/${email}`, {
-    method: "POST",
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Uspeh!
-    successMsg.style.display = "block";
-    submitBtn.innerText = "Pošlji prijavo";
-    submitBtn.disabled = false;
-    form.reset(); // Počisti obrazec
-  })
-  .catch(error => {
-    // Napaka
-    console.error("Error:", error);
-    failMsg.style.display = "block";
-    failMsg.textContent = "❌ Napaka strežnika. Preveri internet ali poskusi z manj slikami.";
-    submitBtn.innerText = "Pošlji prijavo";
-    submitBtn.disabled = false;
-  });
+  // Vizualna povratna informacija
+  submitBtn.innerText = "Pošiljanje... Počakajte.";
 });
 </script>
 
