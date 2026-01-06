@@ -22,8 +22,10 @@
 
   button{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
   button:active{background:#b52b27;transform:scale(0.98)}
+  button:disabled{background:#ccc;cursor:not-allowed}
   
   .hint{font-size:12px;color:#666;margin-top:5px;display:block}
+  .error-msg{color:red;font-weight:bold;margin-top:10px;display:none;text-align:center;border: 1px solid red; padding: 10px; border-radius: 5px; background: #fff0f0;}
 </style>
 </head>
 <body>
@@ -61,8 +63,9 @@
     <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
     <label>📷 Fotografije</label>
-    <input type="file" name="attachment[]" accept="image/*" capture="environment" multiple>
-    <span class="hint">Lahko izbereš več slik hkrati. (Max 25MB skupaj)</span>
+    <input type="file" id="fileInput" name="attachment[]" accept="image/*" capture="environment" multiple>
+    <span class="hint">Izbereš lahko več slik.</span>
+    <div id="sizeError" class="error-msg"></div>
   </div>
 
   <button type="submit" id="submitBtn">Pošlji prijavo</button>
@@ -70,6 +73,7 @@
 </form>
 
 <script>
+// 1. POLNJENJE SEZNAMOV
 const strojSel = document.getElementById("stroj");
 const strojnikSel = document.getElementById("strojnik");
 
@@ -92,10 +96,34 @@ if (typeof strojniki !== 'undefined') {
   });
 }
 
+// 2. LOGIKA
 const form = document.getElementById("reportForm");
 const submitBtn = document.getElementById("submitBtn");
+const fileInput = document.getElementById("fileInput");
+const sizeError = document.getElementById("sizeError");
 
 form.addEventListener("submit", function(e) {
+  // A. PREVERJANJE VELIKOSTI (da preprečimo error 500 pri res velikih datotekah)
+  const files = fileInput.files;
+  let totalSize = 0;
+  
+  for (let i = 0; i < files.length; i++) {
+    totalSize += files[i].size;
+  }
+
+  // Limit 23 MB
+  if (totalSize > 23 * 1048576) {
+    e.preventDefault(); 
+    sizeError.style.display = "block";
+    sizeError.textContent = `⚠️ Slike so prevelike (Skupaj: ${(totalSize/1048576).toFixed(1)} MB). Limit je 23 MB. Prosim, izberi manj slik.`;
+    submitBtn.disabled = false;
+    submitBtn.innerText = "Pošlji prijavo";
+    return;
+  } else {
+    sizeError.style.display = "none";
+  }
+
+  // B. PRIPRAVA EMAILA
   const strojVal = strojSel.value.split(' ')[0] || "Neznano";
   const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
   const strojnikVal = strojnikOption.dataset.id || "Neznano";
