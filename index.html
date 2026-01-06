@@ -15,13 +15,11 @@
   label{font-weight:bold;margin-top:10px;display:block;color:#333}
   select,textarea,input[type=file]{width:100%;padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc;margin-top:6px;box-sizing:border-box}
   
-  /* Radio Buttons Styling */
   .radio-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
   .radio-btn{flex:1;min-width:80px;text-align:center;padding:12px 5px;border-radius:12px;border:2px solid #ccc;font-size:14px;cursor:pointer;background:#fff;transition:0.2s}
   .radio-btn input{display:none}
   .radio-btn:has(input:checked) {border-color:#d9534f;background:#ffeeee;color:#d9534f;font-weight:bold;}
 
-  /* Submit Button */
   button{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
   button:active{background:#b52b27;transform:scale(0.98)}
   
@@ -34,10 +32,8 @@
 
 <form id="reportForm" action="https://formsubmit.co/svajgerramicerik@gmail.com" method="POST" enctype="multipart/form-data">
   
-
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
-  
   <input type="hidden" name="_subject" id="emailSubject" value="Nova prijava okvare">
 
   <div class="section">
@@ -65,8 +61,8 @@
     <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
     <label>📷 Fotografije</label>
-    <input type="file" name="attachment" accept="image/*" capture="environment" multiple>
-    <span class="hint">Lahko izbereš več slik hkrati.</span>
+    <input type="file" name="attachment[]" accept="image/*" capture="environment" multiple>
+    <span class="hint">Lahko izbereš več slik hkrati. (Max 25MB skupaj)</span>
   </div>
 
   <button type="submit" id="submitBtn">Pošlji prijavo</button>
@@ -74,7 +70,6 @@
 </form>
 
 <script>
-// 1. POLNJENJE SEZNAMOV (Brez sprememb)
 const strojSel = document.getElementById("stroj");
 const strojnikSel = document.getElementById("strojnik");
 
@@ -97,26 +92,19 @@ if (typeof strojniki !== 'undefined') {
   });
 }
 
-// 2. POSODOBITEV ZADEVE (SUBJECT) PRED POŠILJANJEM
 const form = document.getElementById("reportForm");
 const submitBtn = document.getElementById("submitBtn");
 
 form.addEventListener("submit", function(e) {
-  // Tukaj NE preprečimo pošiljanja (ne uporabimo preventDefault),
-  // samo nastavimo pravilno besedilo za naslov emaila.
-  
   const strojVal = strojSel.value.split(' ')[0] || "Neznano";
   const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
   const strojnikVal = strojnikOption.dataset.id || "Neznano";
   
-  // Preverimo kateri radio button je izbran
   const vrstaEl = document.querySelector('input[name="Vrsta_okvare"]:checked');
   const vrstaVal = vrstaEl ? vrstaEl.value : "Drugo";
 
-  // Nastavimo skrito polje _subject
   document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
 
-  // Spremenimo gumb, da uporabnik ve, da se dogaja
   submitBtn.innerText = "Pošiljanje... Počakajte trenutek.";
   submitBtn.disabled = true;
 });
