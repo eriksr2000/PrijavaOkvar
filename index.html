@@ -20,10 +20,37 @@
   .radio-btn input{display:none}
   .radio-btn:has(input:checked) {border-color:#d9534f;background:#ffeeee;color:#d9534f;font-weight:bold;}
 
-  button{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
-  button:active{background:#b52b27;transform:scale(0.98)}
+  button.submit-btn{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
+  button.submit-btn:active{background:#b52b27;transform:scale(0.98)}
   
-  .hint{font-size:12px;color:#666;margin-top:5px;display:block}
+  /* Stil za prikaz izbrane datoteke */
+  .file-preview {
+    margin-top: 10px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 8px;
+    display: none; /* Skrito, dokler ni slike */
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #ced4da;
+  }
+  .file-name {
+    font-size: 14px;
+    color: #495057;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 70%;
+  }
+  .remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -61,11 +88,16 @@
     <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
     <label>📷 Fotografija (samo ena)</label>
-    <input type="file" name="attachment" accept="image/*" capture="environment">
-    <span class="hint">Priložiš lahko 1 fotografijo.</span>
+    
+    <input type="file" id="fileInput" name="attachment" accept="image/*" capture="environment">
+    
+    <div id="filePreview" class="file-preview">
+        <span id="fileName" class="file-name"></span>
+        <button type="button" class="remove-btn" onclick="removeImage()">❌ Odstrani</button>
+    </div>
   </div>
 
-  <button type="submit" id="submitBtn">Pošlji prijavo</button>
+  <button type="submit" id="submitBtn" class="submit-btn">Pošlji prijavo</button>
   
 </form>
 
@@ -93,24 +125,42 @@ if (typeof strojniki !== 'undefined') {
   });
 }
 
-// 2. Samo posodobimo Zadevo (Subject) tik pred pošiljanjem
+// 2. Logika za sliko (Prikaz in Brisanje)
+const fileInput = document.getElementById("fileInput");
+const filePreview = document.getElementById("filePreview");
+const fileNameSpan = document.getElementById("fileName");
+
+// Ko uporabnik izbere datoteko
+fileInput.addEventListener("change", function() {
+    if (this.files && this.files.length > 0) {
+        // Prikaži ime datoteke
+        fileNameSpan.textContent = "📷 " + this.files[0].name;
+        // Pokaži okvirček z gumbom za brisanje
+        filePreview.style.display = "flex";
+    }
+});
+
+// Funkcija za brisanje slike
+function removeImage() {
+    fileInput.value = ""; // Počisti input
+    filePreview.style.display = "none"; // Skrij okvirček
+}
+
+
+// 3. Priprava Zadeve (Subject) ob pošiljanju
 const form = document.getElementById("reportForm");
 const submitBtn = document.getElementById("submitBtn");
 
 form.addEventListener("submit", function(e) {
-  // Ne ustavimo pošiljanja (brez e.preventDefault), pustimo da gre naprej
-  
   const strojVal = strojSel.value.split(' ')[0] || "Neznano";
   const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
   const strojnikVal = strojnikOption.dataset.id || "Neznano";
   const vrstaEl = document.querySelector('input[name="Vrsta_okvare"]:checked');
   const vrstaVal = vrstaEl ? vrstaEl.value : "Drugo";
 
-  // Nastavi naslov emaila
   document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
 
-  // Vizualna povratna informacija
-  submitBtn.innerText = "Pošiljanje... Počakajte.";
+  submitBtn.innerText = "Pošlji prijavo";
 });
 </script>
 
