@@ -29,7 +29,7 @@
     padding: 10px;
     background: #e9ecef;
     border-radius: 8px;
-    display: none; /* Skrito, dokler ni slike */
+    display: none;
     align-items: center;
     justify-content: space-between;
     border: 1px solid #ced4da;
@@ -89,7 +89,7 @@
 
     <label>📷 Fotografija (samo ena)</label>
     
-    <input type="file" id="fileInput" name="attachment" accept="image/*" capture="environment">
+    <input type="file" id="fileInput" name="attachment" accept="image/*">
     
     <div id="filePreview" class="file-preview">
         <span id="fileName" class="file-name"></span>
@@ -130,24 +130,19 @@ const fileInput = document.getElementById("fileInput");
 const filePreview = document.getElementById("filePreview");
 const fileNameSpan = document.getElementById("fileName");
 
-// Ko uporabnik izbere datoteko
 fileInput.addEventListener("change", function() {
     if (this.files && this.files.length > 0) {
-        // Prikaži ime datoteke
         fileNameSpan.textContent = "📷 " + this.files[0].name;
-        // Pokaži okvirček z gumbom za brisanje
         filePreview.style.display = "flex";
     }
 });
 
-// Funkcija za brisanje slike
 function removeImage() {
-    fileInput.value = ""; // Počisti input
-    filePreview.style.display = "none"; // Skrij okvirček
+    fileInput.value = ""; 
+    filePreview.style.display = "none";
 }
 
-
-// 3. Priprava Zadeve (Subject) ob pošiljanju
+// 3. Priprava Zadeve (Subject)
 const form = document.getElementById("reportForm");
 const submitBtn = document.getElementById("submitBtn");
 
@@ -160,7 +155,7 @@ form.addEventListener("submit", function(e) {
 
   document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
 
-  submitBtn.innerText = "Pošlji prijavo";
+  submitBtn.innerText = "Pošljanje... Počakajte.";
 });
 </script>
 
