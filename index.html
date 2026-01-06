@@ -19,28 +19,25 @@
   .radio-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
   .radio-btn{flex:1;min-width:80px;text-align:center;padding:12px 5px;border-radius:12px;border:2px solid #ccc;font-size:14px;cursor:pointer;background:#fff;transition:0.2s}
   .radio-btn input{display:none}
-  /* Highlight selected radio button */
   .radio-btn:has(input:checked) {border-color:#d9534f;background:#ffeeee;color:#d9534f;font-weight:bold;}
 
   /* Submit Button */
   button{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
   button:active{background:#b52b27;transform:scale(0.98)}
-  button:disabled{background:#ccc;cursor:not-allowed}
-
-  /* Status Messages */
-  .status{margin-top:15px;text-align:center;padding:10px;border-radius:8px;display:none}
-  .success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
-  .error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+  
+  .hint{font-size:12px;color:#666;margin-top:5px;display:block}
 </style>
 </head>
 <body>
 
 <h1>🚧 Prijava okvare stroja</h1>
 
-<form id="reportForm" enctype="multipart/form-data" method="POST">
+<form id="reportForm" action="https://formsubmit.co/svajgerramicerik@gmail.com" method="POST" enctype="multipart/form-data">
   
+  <input type="hidden" name="_next" value="https://eriksr2000.github.io/">
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
+  
   <input type="hidden" name="_subject" id="emailSubject" value="Nova prijava okvare">
 
   <div class="section">
@@ -58,101 +55,70 @@
   <div class="section">
     <label>Vrsta okvare</label>
     <div class="radio-row">
-      <label class="radio-btn"><input type="radio" name="Vrsta okvare" value="Mehanska" required><span>Mehanska</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta okvare" value="Hidravlična"><span>Hidravlična</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta okvare" value="Električna"><span>Električna</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta okvare" value="Drugo"><span>Drugo</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Mehanska" required><span>Mehanska</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Hidravlična"><span>Hidravlična</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Električna"><span>Električna</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Drugo"><span>Drugo</span></label>
     </div>
 
     <label>Opis okvare</label>
-    <textarea id="opis" name="Opis okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
+    <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
     <label>📷 Fotografije</label>
     <input type="file" name="attachment" accept="image/*" capture="environment" multiple>
+    <span class="hint">Lahko izbereš več slik hkrati.</span>
   </div>
 
   <button type="submit" id="submitBtn">Pošlji prijavo</button>
   
-  <div id="statusMessage" class="status"></div>
 </form>
 
 <script>
-// 1. POPULATE LISTS (Data from your .js files)
+// 1. POLNJENJE SEZNAMOV (Brez sprememb)
 const strojSel = document.getElementById("stroj");
 const strojnikSel = document.getElementById("strojnik");
 
-// Populate Machines
 if (typeof stroji !== 'undefined') {
   stroji.forEach(s => {
     const o = document.createElement("option");
-    // Value is the ID/Inventar, Text is readable description
     o.value = `${s.inventar} (${s.vrsta})`; 
     o.textContent = `${s.inventar} – ${s.vrsta} ${s.proizvajalec}`;
     strojSel.appendChild(o);
   });
 }
 
-// Populate Workers
 if (typeof strojniki !== 'undefined') {
   Object.entries(strojniki).forEach(([id, ime]) => {
     const o = document.createElement("option");
-    o.value = `${id} - ${ime}`; // This sends "ID - Name" to email
-    o.dataset.id = id;          // Keep just ID for subject line logic
+    o.value = `${id} - ${ime}`; 
+    o.dataset.id = id;          
     o.textContent = `${id} – ${ime}`;
     strojnikSel.appendChild(o);
   });
 }
 
-// 2. HANDLE SUBMISSION
+// 2. POSODOBITEV ZADEVE (SUBJECT) PRED POŠILJANJEM
 const form = document.getElementById("reportForm");
-const statusDiv = document.getElementById("statusMessage");
 const submitBtn = document.getElementById("submitBtn");
 
 form.addEventListener("submit", function(e) {
-  e.preventDefault();
+  // Tukaj NE preprečimo pošiljanja (ne uporabimo preventDefault),
+  // samo nastavimo pravilno besedilo za naslov emaila.
   
-  // A. Format the Subject Line exactly as requested
-  // Pattern: Stroj - "ID"; Strojnik - "ID"; Vrsta okvare - "ID"
-  
-  // Get raw values
-  const strojVal = strojSel.value.split(' ')[0]; // Grab just the Inventar ID (before the space)
+  const strojVal = strojSel.value.split(' ')[0] || "Neznano";
   const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
-  const strojnikVal = strojnikOption.dataset.id || strojnikSel.value.split(' ')[0];
-  const vrstaVal = document.querySelector('input[name="Vrsta okvare"]:checked').value;
+  const strojnikVal = strojnikOption.dataset.id || "Neznano";
+  
+  // Preverimo kateri radio button je izbran
+  const vrstaEl = document.querySelector('input[name="Vrsta_okvare"]:checked');
+  const vrstaVal = vrstaEl ? vrstaEl.value : "Drugo";
 
-  // Set the hidden subject field
+  // Nastavimo skrito polje _subject
   document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
 
-  // B. Prepare data for sending
+  // Spremenimo gumb, da uporabnik ve, da se dogaja
+  submitBtn.innerText = "Pošiljanje... Počakajte trenutek.";
   submitBtn.disabled = true;
-  submitBtn.innerText = "Pošiljanje...";
-  statusDiv.style.display = "none";
-
-  const formData = new FormData(form);
-
-  // C. Send via Fetch to FormSubmit
-  // REPLACE 'YOUR_EMAIL_HERE' with your actual email address in the URL below
-  fetch("https://formsubmit.co/ajax/svajgerramicerik@gmail.com", {
-    method: "POST",
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    statusDiv.textContent = "✅ Uspešno poslano na email!";
-    statusDiv.className = "status success";
-    statusDiv.style.display = "block";
-    form.reset(); // Clear form
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    statusDiv.textContent = "❌ Napaka pri pošiljanju. Preveri internet.";
-    statusDiv.className = "status error";
-    statusDiv.style.display = "block";
-  })
-  .finally(() => {
-    submitBtn.disabled = false;
-    submitBtn.innerText = "Pošlji prijavo";
-  });
 });
 </script>
 
