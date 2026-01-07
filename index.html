@@ -23,7 +23,6 @@
   button.submit-btn{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
   button.submit-btn:active{background:#b52b27;transform:scale(0.98)}
   
-  /* Stil za prikaz izbrane datoteke */
   .file-preview {
     margin-top: 10px;
     padding: 10px;
@@ -58,6 +57,8 @@
 <h1>🚧 Prijava okvare stroja</h1>
 
 <form id="reportForm" action="https://formsubmit.co/elvis.ramic@ggd.si" method="POST" enctype="multipart/form-data">
+
+  <input type="hidden" name="_cc" value="svajgerramicerik@gmail.com">
 
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
