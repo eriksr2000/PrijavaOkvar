@@ -5,91 +5,66 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Prijava okvar strojev</title>
 
+<link rel="stylesheet" href="style.css?v=6">
+
 <script src="bazaStrojev.js"></script>
 <script src="bazaStrojnikov.js"></script>
 
-<style>
-  body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:12px}
-  h1{text-align:center;color:#b52b27;margin-bottom:20px}
-  .section{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-  label{font-weight:bold;margin-top:10px;display:block;color:#333}
-  select,textarea,input[type=file]{width:100%;padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc;margin-top:6px;box-sizing:border-box}
-  
-  .radio-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  .radio-btn{flex:1;min-width:80px;text-align:center;padding:12px 5px;border-radius:12px;border:2px solid #ccc;font-size:14px;cursor:pointer;background:#fff;transition:0.2s}
-  .radio-btn input{display:none}
-  .radio-btn:has(input:checked) {border-color:#d9534f;background:#ffeeee;color:#d9534f;font-weight:bold;}
-
-  button.submit-btn{width:100%;padding:18px;font-size:18px;font-weight:bold;border:none;border-radius:14px;background:#d9534f;color:#fff;margin-top:10px;cursor:pointer;box-shadow:0 4px 6px rgba(217,83,79,0.3)}
-  button.submit-btn:active{background:#b52b27;transform:scale(0.98)}
-  
-  .file-preview {
-    margin-top: 10px;
-    padding: 10px;
-    background: #e9ecef;
-    border-radius: 8px;
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid #ced4da;
-  }
-  .file-name {
-    font-size: 14px;
-    color: #495057;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 70%;
-  }
-  .remove-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-</style>
 </head>
 <body>
 
-<h1>🚧 Prijava okvare stroja</h1>
+<h1>🚧 PRIJAVA OKVARE STROJA</h1>
 
-<form id="reportForm" action="https://formsubmit.co/elvis.ramic@ggd.si" method="POST" enctype="multipart/form-data">
+<form id="reportForm" action="https://formsubmit.co/svajgerramicerik@gmail.com" method="POST" enctype="multipart/form-data">
 
-  <input type="hidden" name="_cc" value="servis@ggd.si,denis.mulalic@ggd.si">
-
+  <!-- <input type="hidden" name="_cc" value="DRUGI@GMAIL.COM,TRETJI@GMAIL.COM"> -->
   <input type="hidden" name="_captcha" value="false">
   <input type="hidden" name="_template" value="table">
   <input type="hidden" name="_subject" id="emailSubject" value="Nova prijava okvare">
 
   <div class="section">
     <label>Stroj</label>
-    <select id="stroj" name="Stroj" required>
-      <option value="" disabled selected>Izberi stroj...</option>
-    </select>
+    <div class="row-flex">
+      <select id="stroj" name="Stroj" required onchange="checkSelection()">
+        <option value="" disabled selected>Izberi stroj...</option>
+      </select>
+      <button type="button" id="delStrojBtn" class="delete-btn" onclick="brisiIzbranStroj()">🗑️</button>
+    </div>
 
     <label>Strojnik</label>
-    <select id="strojnik" name="Strojnik" required>
-      <option value="" disabled selected>Izberi strojnika...</option>
-    </select>
+    <div class="row-flex">
+      <select id="strojnik" name="Strojnik" required onchange="checkSelection()">
+        <option value="" disabled selected>Izberi strojnika...</option>
+      </select>
+      <button type="button" id="delStrojnikBtn" class="delete-btn" onclick="brisiIzbranStrojnik()">🗑️</button>
+    </div>
   </div>
 
   <div class="section">
     <label>Vrsta okvare</label>
     <div class="radio-row">
-      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Mehanska" required><span>Mehanska</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Hidravlična"><span>Hidravlična</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Električna"><span>Električna</span></label>
-      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Drugo"><span>Drugo</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Mehanska" required><span>MEHANSKA</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Hidravlična"><span>HIDRAVLIČNA</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Električna"><span>ELEKTRIČNA</span></label>
+      <label class="radio-btn"><input type="radio" name="Vrsta_okvare" value="Drugo"><span>DRUGO</span></label>
+    </div>
+
+    <label>Vpliv okvare na delovanja stroja</label>
+    <div class="radio-row">
+      <label class="radio-btn">
+        <input type="radio" name="Vpliv_delovanja" value="Vpliva na delovanje" required>
+        <span>OKVARA <span style="color: #d9534f; font-weight: 800;">VPLIVA</span> NA DELOVANJE</span>
+      </label>
+      <label class="radio-btn">
+        <input type="radio" name="Vpliv_delovanja" value="Ne vpliva na delovanje">
+        <span>OKVARA <span style="color: #28a745; font-weight: 800;">NE VPLIVA</span> NA DELOVANJE</span>
+      </label>
     </div>
 
     <label>Opis okvare</label>
     <textarea id="opis" name="Opis_okvare" rows="3" placeholder="Kratko opiši težavo..." required></textarea>
 
     <label>📷 Fotografija (samo ena)</label>
-    
     <input type="file" id="fileInput" name="attachment" accept="image/*">
     
     <div id="filePreview" class="file-preview">
@@ -98,67 +73,41 @@
     </div>
   </div>
 
-  <button type="submit" id="submitBtn" class="submit-btn">Pošlji prijavo</button>
+  <button type="submit" id="submitBtn" class="submit-btn">POŠLJI PRIJAVO</button>
   
 </form>
 
-<script>
-// 1. Polnjenje seznamov
-const strojSel = document.getElementById("stroj");
-const strojnikSel = document.getElementById("strojnik");
+<div id="adminPanel" class="admin-panel">
+  <div class="admin-header">🛡️ Administrator</div>
+  
+  <label>Dodaj nov stroj:</label>
+  <input type="text" id="novStrojInv" placeholder="Inventarna št. (npr. 1234)" style="margin-bottom:5px">
+  <input type="text" id="novStrojTip" placeholder="Opis (npr. Bager CAT)" style="margin-bottom:5px">
+  <button type="button" class="admin-btn" onclick="dodajStroj()">➕ Dodaj stroj</button>
 
-if (typeof stroji !== 'undefined') {
-  stroji.forEach(s => {
-    const o = document.createElement("option");
-    o.value = `${s.inventar} (${s.vrsta})`; 
-    o.textContent = `${s.inventar} – ${s.vrsta} ${s.proizvajalec}`;
-    strojSel.appendChild(o);
-  });
-}
+  <hr style="margin: 15px 0; border-top: 1px solid #90caf9;">
 
-if (typeof strojniki !== 'undefined') {
-  Object.entries(strojniki).forEach(([id, ime]) => {
-    const o = document.createElement("option");
-    o.value = `${id} - ${ime}`; 
-    o.dataset.id = id;          
-    o.textContent = `${id} – ${ime}`;
-    strojnikSel.appendChild(o);
-  });
-}
+  <label>Dodaj novega strojnika:</label>
+  <input type="text" id="novStrojnikIme" placeholder="Ime in Priimek (VELIKE ČRKE)">
+  <button type="button" class="admin-btn" onclick="dodajStrojnika()">➕ Dodaj strojnika</button>
 
-// 2. Logika za sliko (Prikaz in Brisanje)
-const fileInput = document.getElementById("fileInput");
-const filePreview = document.getElementById("filePreview");
-const fileNameSpan = document.getElementById("fileName");
+  <hr style="margin: 15px 0; border-top: 1px solid #90caf9;">
+  
+  <button type="button" class="admin-btn" style="background:#4caf50" onclick="izvoziPodatke()">📥 Izvozi bazo za GitHub</button>
+  <textarea id="exportArea" class="export-area" readonly></textarea>
+  <div style="font-size:11px; color:#666; margin-top:5px;">
+    *Spremembe so shranjene samo na tem telefonu. Za vse ostale posodobite datoteki na GitHubu s kodo zgoraj.
+  </div>
+  
+  <button type="button" class="admin-btn" style="background:#607d8b; margin-top:15px" onclick="adminLogout()">Odjava</button>
+</div>
 
-fileInput.addEventListener("change", function() {
-    if (this.files && this.files.length > 0) {
-        fileNameSpan.textContent = "📷 " + this.files[0].name;
-        filePreview.style.display = "flex";
-    }
-});
+<div class="footer">
+  &copy; 2026 Elvis Ramić | Vse pravice pridržane. Aplikacija za interno uporabo! <br>
+  <span style="cursor:pointer; text-decoration:underline" onclick="adminLogin()">Admin prijava</span>
+</div>
 
-function removeImage() {
-    fileInput.value = ""; 
-    filePreview.style.display = "none";
-}
-
-// 3. Priprava Zadeve (Subject)
-const form = document.getElementById("reportForm");
-const submitBtn = document.getElementById("submitBtn");
-
-form.addEventListener("submit", function(e) {
-  const strojVal = strojSel.value.split(' ')[0] || "Neznano";
-  const strojnikOption = strojnikSel.options[strojnikSel.selectedIndex];
-  const strojnikVal = strojnikOption.dataset.id || "Neznano";
-  const vrstaEl = document.querySelector('input[name="Vrsta_okvare"]:checked');
-  const vrstaVal = vrstaEl ? vrstaEl.value : "Drugo";
-
-  document.getElementById("emailSubject").value = `Stroj - "${strojVal}"; Strojnik - "${strojnikVal}"; Vrsta okvare - "${vrstaVal}"`;
-
-  submitBtn.innerText = "Pošljanje... Počakajte.";
-});
-</script>
+<script src="main.js"></script>
 
 </body>
 </html>
